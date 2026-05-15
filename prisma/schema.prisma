@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model WarehouseReceipt {
+  id              String    @id @default(uuid())
+  receiptNo       String
+  department      String
+  unitName        String
+  deliveryPerson  String
+  importReason    String
+  warehouseName   String
+  documentCount   Int
+  totalAmount     Decimal
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  items WarehouseReceiptItem[]
+}
+
+model WarehouseReceiptItem {
+  id              String   @id @default(uuid())
+
+  receiptId       String
+  receipt         WarehouseReceipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+
+  productName     String
+  productCode     String
+  unit            String
+
+  quantity        Decimal
+  actualQuantity  Decimal
+  unitPrice       Decimal
+  amount          Decimal
+}
