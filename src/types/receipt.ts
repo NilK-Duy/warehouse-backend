@@ -1,11 +1,8 @@
-export interface ReceiptItem {
-  productName: string;
-  productCode: string;
-  unit: string;
+export interface ReceiptItemInput {
+  productId: string;
   quantity: number;
   actualQuantity: number;
   unitPrice: number;
-  amount: number;
 }
 
 export interface ReceiptBody {
@@ -15,7 +12,7 @@ export interface ReceiptBody {
   deliveryPerson: string;
   importReason: string;
   warehouseName: string;
+  location?: string;
   documentCount: number;
-  totalAmount: number;
-  items: ReceiptItem[];
+  items: ReceiptItemInput[];
 }
