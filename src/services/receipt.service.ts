@@ -1,82 +1,77 @@
-import { pool } from "../configs/db";
+import prisma from "../lib/prisma"
 import { ReceiptBody } from "../types/receipt";
-import { v4 as uuidv4 } from "uuid";
 
+// 1. Get the list of receipts (with rough pagination included)
+export const getAllReceipts = async () => {
+  return await prisma.warehouseReceipt.findMany({
+    orderBy: { createdAt: "desc" },
+  });
+};
+
+// 2. Get the details of the receipt (including the product information to be attached).
+export const getReceiptById = async (id: string) => {
+  return await prisma.warehouseReceipt.findUnique({
+    where: { id },
+    include: {
+      items: {
+        include: {
+          product: true,
+        },
+      },
+    },
+  });
+};
+
+// 3. Create a new standard business receipt (using Transactions).
 export const createReceipt = async (body: ReceiptBody) => {
-  const client = await pool.connect();
+  return await prisma.$transaction(async (tx) => { 
+    let calculatedTotalAmount = 0;
 
-  try {
-    await client.query("BEGIN");
+    const itemsWithAmount = body.items.map((item) => {
+      const amount = item.actualQuantity * item.unitPrice;
+      calculatedTotalAmount += amount;
 
-    const receiptId = uuidv4();
+      return {
+        productId: item.productId,
+        quantity: item.quantity,
+        actualQuantity: item.actualQuantity,
+        unitPrice: item.unitPrice,
+        amount: amount,
+      };
+    });
 
-    await client.query(
-      `
-      INSERT INTO warehouse_receipts (
-        id,
-        receipt_no,
-        department,
-        unit_name,
-        delivery_person,
-        import_reason,
-        warehouse_name,
-        document_count,
-        total_amount
-      )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-      `,
-      [
-        receiptId,
-        body.receiptNo,
-        body.department,
-        body.unitName,
-        body.deliveryPerson,
-        body.importReason,
-        body.warehouseName,
-        body.documentCount,
-        body.totalAmount,
-      ]
-    );
+    const newReceipt = await tx.warehouseReceipt.create({
+      data: {
+        receiptNo: body.receiptNo,
+        department: body.department,
+        unitName: body.unitName,
+        deliveryPerson: body.deliveryPerson,
+        importReason: body.importReason,
+        warehouseName: body.warehouseName,
+        location: body.location || null,
+        documentCount: body.documentCount,
+        totalAmount: calculatedTotalAmount,
+        items: {
+          create: itemsWithAmount,
+        },
+      },
+      include: {
+        items: true,
+      },
+    });
 
-    for (const item of body.items) {
-      await client.query(
-        `
-        INSERT INTO warehouse_receipt_items (
-          id,
-          receipt_id,
-          product_name,
-          product_code,
-          unit,
-          quantity,
-          actual_quantity,
-          unit_price,
-          amount
-        )
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-        `,
-        [
-          uuidv4(),
-          receiptId,
-          item.productName,
-          item.productCode,
-          item.unit,
-          item.quantity,
-          item.actualQuantity,
-          item.unitPrice,
-          item.amount,
-        ]
-      );
-    }
+    return newReceipt;
+  });
+};
 
-    await client.query("COMMIT");
+// 4. Add a new product to the original catalog.
+export const createProduct = async (data: { code: string; name: string; unit: string }) => {
+  return await prisma.product.create({ data });
+};
 
-    return {
-      message: "Create receipt successfully",
-    };
-  } catch (error) {
-    await client.query("ROLLBACK");
-    throw error;
-  } finally {
-    client.release();
-  }
+// 5. Get the list of products so the client can display the Select/Autocomplete box.
+export const getAllProducts = async () => {
+  return await prisma.product.findMany({
+    orderBy: { code: "asc" },
+  });
 };
