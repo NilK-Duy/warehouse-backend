@@ -9,7 +9,7 @@
     "build": "tsc && prisma generate",
     "start": "npm run migrate && node dist/server.js",
     "prisma:generate": "prisma generate",
-    "migration:create": "prisma migrate dev --create-only",
+    "migration:create": "prisma migrate dev",
     "migrate": "prisma migrate deploy"
   },
   "keywords": [],

@@ -46,10 +46,9 @@ export const createReceipt = async (body: ReceiptBody) => {
         department: body.department,
         unitName: body.unitName,
         deliveryPerson: body.deliveryPerson,
-        importReason: body.importReason,
         warehouseName: body.warehouseName,
         location: body.location || null,
-        documentCount: body.documentCount,
+        attachedDocument: body.attachedDocument || null,
         totalAmount: calculatedTotalAmount,
         items: {
           create: itemsWithAmount,

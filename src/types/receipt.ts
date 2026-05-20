@@ -10,9 +10,8 @@ export interface ReceiptBody {
   department: string;
   unitName: string;
   deliveryPerson: string;
-  importReason: string;
   warehouseName: string;
   location?: string;
-  documentCount: number;
+  attachedDocument?: string;
   items: ReceiptItemInput[];
 }
