@@ -1,6 +1,6 @@
 import request from "supertest";
 import express from "express";
-import receiptRouter from "../routes/receipt.route"
+import receiptRouter from "../routes/receipt.routes"
 import * as receiptService from "../services/receipt.service";
 
 jest.mock("../services/receipt.service");
