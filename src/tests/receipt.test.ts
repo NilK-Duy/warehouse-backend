@@ -83,9 +83,8 @@ describe("Receipt API Integration Tests", () => {
         department: "IT",
         unitName: "Kho A",
         deliveryPerson: "Alex",
-        importReason: "Nhập linh kiện máy tính",
         warehouseName: "Main WH",
-        documentCount: 3,
+        attachedDocument: "12334",
         items: [
           {
             productId: "prod-abc", // Trường chuẩn bắt buộc thay cho productName cũ

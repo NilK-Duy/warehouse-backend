@@ -11,10 +11,9 @@ export const receiptCreateSchema = z.object({
   department: z.string().min(1),
   unitName: z.string().min(1),
   deliveryPerson: z.string().min(1),
-  importReason: z.string().min(1),
   warehouseName: z.string().min(1),
   location: z.string().optional(),
-  documentCount: z.number().int().nonnegative(),
+  attachedDocument: z.string().optional(),
   items: z.array(
     z.object({
       productId: z.string().uuid("productId must be a valid UUID string"),

@@ -35,6 +35,7 @@ export const createReceiptController = async (req: Request, res: Response) => {
     const result = await receiptService.createReceipt(validatedData);
     res.status(201).json(result);
   } catch (error: any) {
+    console.error("Error creating receipt:", error);
     res.status(400).json({ message: error.errors || error.message });
   }
 };
